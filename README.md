@@ -1,1 +1,2 @@
 # pracos
+Target : i686
