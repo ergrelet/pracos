@@ -1,3 +1,3 @@
 # pracos
-Target : i686
+Target : i686  
 Bootloader : Multiboot compliant
