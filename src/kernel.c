@@ -1,4 +1,11 @@
+#include <gdt.h>
+#include <idt.h>
+#include <isrs.h>
+#include <irq.h>
+#include <io.h>
 #include <terminal.h>
+#include <timer.h>
+#include <keyboard.h>
 
 /* Check if the compiler thinks if we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -16,10 +23,18 @@ extern "C" /* Use C linkage for kernel_main. */
 void kernel_main() {
 	/* Initialize terminal interface */
 	terminal_initialize();
+	terminal_puts("Terminal has been initialized\n");
+	/* Initialize GDT & IDT */
+	gdt_initialize();
+	idt_initialize();
+	terminal_puts("GDT & IDT have been initialized\n");
+	irq_initialize();
+	isrs_initialize();
+	enable_interrupts();
 	
-	for(size_t i=0; i< 25; ++i) {
-		terminal_writestring("Pracos kernel spams\n");
-	}
-	terminal_writestring("OOPS1\n");
-	terminal_writestring("OOPS2\n");
+	timer_initialize();
+	kbd_initialize();
+	terminal_puts("Keyboard has been initialized\n");
+	
+	terminal_puts("The End\n");
 }

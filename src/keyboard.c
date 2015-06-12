@@ -1,4 +1,6 @@
 #include <io.h>
+#include <irq.h>
+#include <terminal.h>
 
 #define KBD_DATA	0x60
 #define KBD_STATUS	0x64
@@ -44,8 +46,11 @@ unsigned char kbdus[128] =
 };
 
 /* Handler for IRQ1 */
-void kbd_handler() {
+void
+kbd_handler(struct regs *r) {
 	unsigned char scancode = inb(KBD_DATA);
+	
+	terminal_puts("CA MARCHE PUTAIN\n");
 	
 	if(scancode & 0x80) { /* Key released */
 		/* Handle : CTRL, ALT, CAPSLOCK here */
@@ -54,3 +59,9 @@ void kbd_handler() {
 		/* print char or something ? */
 	}
 }
+
+void
+kbd_initialize() {
+	irq_add_handler(1, kbd_handler);
+}
+
