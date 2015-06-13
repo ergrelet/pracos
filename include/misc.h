@@ -8,4 +8,8 @@ size_t strlen(const char* str);
 
 void *memset(void *s, int32_t c, size_t n);
 
+int islower(int c);
+int toupper(int c);
+
+
 #endif

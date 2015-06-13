@@ -17,3 +17,14 @@ memset(void* s, int32_t c, size_t n) {
 	
 	return s;
 }
+
+int
+islower(int c) {
+	return (c <= 'z' && c >= 'a');
+}
+
+int
+toupper(int c) {
+	return islower(c) ? (c ^ 0x20) : c;
+}
+

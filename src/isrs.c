@@ -79,8 +79,7 @@ extern void _isr30();
 extern void _isr31();
 
 void
-isrs_initialize()
-{
+isrs_initialize() {
     idt_set_gate(0, (unsigned)_isr0, 0x08, 0x8E);
     idt_set_gate(1, (unsigned)_isr1, 0x08, 0x8E);
     idt_set_gate(2, (unsigned)_isr2, 0x08, 0x8E);
@@ -121,14 +120,11 @@ isrs_initialize()
 *  endless loop. All ISRs disable interrupts while they are being
 *  serviced as a 'locking' mechanism to prevent an IRQ from
 *  happening and messing up kernel data structures */
-void _fault_handler(struct regs *r)
-{
+void _fault_handler(struct regs *r) {
     /* Is this a fault whose number is from 0 to 31? */
     if (r->int_no < 32)
     {
-        /* Display the description for the Exception that occurred.
-        *  In this tutorial, we will simply halt the system using an
-        *  infinite loop */
+        /* Display the description for the Exception that occurred. */
         terminal_puts(exception_messages[r->int_no]);
         terminal_puts(" Exception. System Halted!\n");
         for (;;);

@@ -1,5 +1,6 @@
 #include <terminal.h>
 #include <misc.h>
+#include <io.h>
 #include <stdbool.h>
 
 /* Hardware text mode color constants. */
@@ -55,10 +56,28 @@ terminal_initialize() {
 		}
 	}
 }
+
+void
+terminal_movecursor(size_t row, size_t column) {
+    uint16_t position=(row*80) + column;
+ 
+    // cursor LOW port to vga INDEX register
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t)(position&0xFF));
+    // cursor HIGH port to vga INDEX register
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t)((position>>8)&0xFF));
+}
  
 void
 terminal_setcolor(uint8_t color) {
 	terminal_color = color;
+}
+
+//TODO
+void
+terminal_cls() {
+
 }
 
 void
@@ -87,31 +106,55 @@ terminal_putentryat(char c, uint8_t color, size_t x, size_t y) {
 }
  
 void
-terminal_putchar(char c) {
+terminal_putc(char c) {
 	/* New line */
-	if(c == '\n') {
-		terminal_column = 0;
-		if (terminal_row == VGA_HEIGHT-1) {
-			terminal_scroll();
-		}
-		else {
-			terminal_row++;
-		}
-		return;
+	switch(c) {
+		case '\n':
+			terminal_column = 0;
+			if (terminal_row == VGA_HEIGHT-1) {
+				terminal_scroll();
+			}
+			else {
+				terminal_row++;
+			}
+			break;
+		case '\t':
+			terminal_column += 4-(terminal_column%4);
+			break;
+		case '\b':
+			if(terminal_column > 0) {
+				terminal_putentryat(0, terminal_color, --terminal_column, terminal_row);
+			}
+			break;
+		default: /* Other chars */
+			terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+			if (++terminal_column == VGA_WIDTH) {
+				terminal_column = 0;
+				if (++terminal_row == VGA_HEIGHT) {
+					terminal_row = 0;
+				}
+			}
 	}
-	/* Other chars */
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT) {
-			terminal_row = 0;
-		}
-	}
+	terminal_movecursor(terminal_row, terminal_column);
 }
  
 void
 terminal_puts(const char* data) {
 	size_t datalen = strlen(data);
 	for (size_t i = 0; i < datalen; i++)
-		terminal_putchar(data[i]);
+		terminal_putc(data[i]);
+}
+
+void
+terminal_putuint32(uint32_t n) {
+	uint32_t size = 1;
+	while(n/size > 9) {
+		size *= 10;
+	}
+	while(size > 0) {
+		uint8_t digit = n/size;
+		terminal_putc('0'+digit);
+		n -= digit*size;
+		size /= 10;
+	}
 }

@@ -3,7 +3,7 @@ objects := $(patsubst %.c,%.o,$(wildcard src/*.c))
 
 #rule to transform c files into o files
 %.o : %.c
-	i686-elf-gcc -Iinclude -c $^ -o $@ -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+	i686-elf-gcc -Iinclude -c $^ -o $@ -std=gnu99 -ffreestanding -O2 -Wall -Wextra -pedantic
 	
 boot:
 	i686-elf-as src/boot.s -o src/boot.o
@@ -19,4 +19,11 @@ link:
 all: boot files link
 
 clean:
-	rm *~; rm *.o; cd src; rm *~; rm *.o;
+	rm -f src/*.o
+
+distclean: clean
+	rm -f *~
+	rm -f src/*~
+	rm -f include/*~
+	
+.PHONY: clean distclean

@@ -1,6 +1,7 @@
 #include <irq.h>
 #include <io.h>
 #include <idt.h>
+#include <terminal.h>
 
 /* These are own ISRs that point to our special IRQ handler
 *  instead of the regular 'fault_handler' function */
@@ -21,9 +22,11 @@ extern void _irq13();
 extern void _irq14();
 extern void _irq15();
 
+typedef void (*irq_handler_ptr)(struct regs *r);
+
 /* This array is actually an array of function pointers. We use
 *  this to handle custom IRQ handlers for a given IRQ */
-void* irq_routines[16] =
+irq_handler_ptr irq_routines[16] =
 {
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
@@ -31,15 +34,13 @@ void* irq_routines[16] =
 
 /* This installs a custom IRQ handler for the given IRQ */
 void
-irq_add_handler(int32_t num, void (*handler)(struct regs *r))
-{
+irq_add_handler(int32_t num, void (*handler)(struct regs *r)) {
     irq_routines[num] = handler;
 }
 
 /* This clears the handler for a given IRQ */
 void
-irq_remove_handler(int32_t num)
-{
+irq_remove_handler(int32_t num) {
     irq_routines[num] = 0;
 }
 
@@ -52,8 +53,7 @@ irq_remove_handler(int32_t num)
 *  order to make IRQ0 to 15 be remapped to IDT entries 32 to
 *  47 */
 void
-irq_remap(void)
-{
+irq_remap(void) {
     outb(0x20, 0x11);
     outb(0xA0, 0x11);
     outb(0x21, 0x20);
@@ -66,12 +66,8 @@ irq_remap(void)
     outb(0xA1, 0x0);
 }
 
-/* We first remap the interrupt controllers, and then we install
-*  the appropriate ISRs to the correct entries in the IDT. This
-*  is just like installing the exception handlers */
 void
-irq_initialize()
-{
+irq_initialize() {
     irq_remap();
 
     idt_set_gate(32, (uint32_t)_irq0, 0x08, 0x8E);
@@ -93,8 +89,7 @@ irq_initialize()
 }
 
 void
-_irq_handler(struct regs *r)
-{
+_irq_handler(struct regs* r) {	
     /* This is a blank function pointer */
     void (*handler)(struct regs *r);
 

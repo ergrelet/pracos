@@ -21,20 +21,17 @@ extern "C" /* Use C linkage for kernel_main. */
 #endif
 
 void kernel_main() {
-	/* Initialize terminal interface */
-	terminal_initialize();
-	terminal_puts("Terminal has been initialized\n");
-	/* Initialize GDT & IDT */
 	gdt_initialize();
 	idt_initialize();
-	terminal_puts("GDT & IDT have been initialized\n");
-	irq_initialize();
 	isrs_initialize();
-	enable_interrupts();
+	irq_initialize();
 	
+	terminal_initialize();
 	timer_initialize();
 	kbd_initialize();
-	terminal_puts("Keyboard has been initialized\n");
+	enable_interrupts();
 	
-	terminal_puts("The End\n");
+	terminal_puts("pracos kernel\n");
+
+	for(;;);
 }
